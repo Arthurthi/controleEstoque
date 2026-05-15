@@ -2,13 +2,23 @@ package main
 
 import (
 	"controleEstoque/internal/database"
+	"controleEstoque/internal/products"
 	"controleEstoque/internal/routes"
 )
 
 func main() {
-	database.GetDB()
+	db := database.Connect()
 
-	routes.InitRoutes()
+	//Auto migrate
+	db.AutoMigrate(&products.Product{})
 
-	database.CloseDB(database.GetDB())
+	// DI (injeção de dependência)
+	repo := products.NewProductRepository(db)
+	service := products.NewProductService(repo)
+	handler := products.NewProductHandler(service)
+
+	//router
+	r := routes.SetupRouter(handler)
+
+	r.Run(":8080")
 }

@@ -1,19 +1,19 @@
 package database
 
 import (
-	"database/sql"
+	"log"
 
-	_ "modernc.org/sqlite"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
-func GetDB() *sql.DB {
-	db, err := sql.Open("sqlite", "./database.db")
+func Connect() *gorm.DB {
+	db, err := gorm.Open(sqlite.Open("app.db"), &gorm.Config{})
 	if err != nil {
-		panic(err)
+		log.Fatal("erro ao conectar no banco:", err)
 	}
-	return db
-}
 
-func CloseDB(db *sql.DB) {
-	db.Close()
+	db.Exec("PRAGMA journal_mode = WAL;")
+
+	return db
 }
